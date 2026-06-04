@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="410" viewBox="0 0 800 410" font-family="SFMono-Regular,Consolas,Menlo,monospace">
+  <rect width="800" height="410" rx="10" fill="#0b0e14"/>
+  <text x="24" y="38" font-size="18" font-weight="700" fill="#e6edf3" font-family="system-ui,sans-serif">log-template-miner</text>
+  <text x="250" y="38" font-size="13" fill="#7d8590" font-family="system-ui,sans-serif">10,000s of lines → a handful of templates</text>
+  <!-- raw -->
+  <rect x="20" y="56" width="360" height="190" rx="8" fill="#11161f"/>
+  <text x="34" y="78" font-size="11" fill="#6e7681">raw logs</text>
+  <text font-size="10.5" fill="#9aa4b2" xml:space="preserve">
+    <tspan x="34" y="100">User alice logged in from 10.0.0.1</tspan>
+    <tspan x="34" y="118">User bob logged in from 10.0.0.2</tspan>
+    <tspan x="34" y="136">User carol logged in from 192.168.1.9</tspan>
+    <tspan x="34" y="154">GET /api/users 200 in 42ms</tspan>
+    <tspan x="34" y="172">GET /api/orders 200 in 88ms</tspan>
+    <tspan x="34" y="190">Disk usage at 80 percent</tspan>
+    <tspan x="34" y="208">Disk usage at 95 percent</tspan>
+    <tspan x="34" y="226">payment 0x9fa2 declined for acct 4821</tspan>
+  </text>
+  <text x="392" y="156" font-size="20" fill="#30363d">→</text>
+  <!-- templates -->
+  <rect x="420" y="56" width="360" height="190" rx="8" fill="#11161f"/>
+  <text x="434" y="78" font-size="11" fill="#6e7681">mined templates</text>
+  <text font-size="11" xml:space="preserve">
+    <tspan x="434" y="102" fill="#3fb950">3×  </tspan><tspan fill="#e6edf3">User &lt;*&gt; logged in from &lt;IP&gt;</tspan>
+    <tspan x="434" y="124" fill="#3fb950">2×  </tspan><tspan fill="#e6edf3">GET &lt;PATH&gt; &lt;NUM&gt; in &lt;NUM&gt;ms</tspan>
+    <tspan x="434" y="146" fill="#3fb950">2×  </tspan><tspan fill="#e6edf3">Disk usage at &lt;NUM&gt; percent</tspan>
+    <tspan x="434" y="168" fill="#d29922">1×  </tspan><tspan fill="#e6edf3">payment &lt;HEX&gt; declined for</tspan>
+    <tspan x="458" y="184" fill="#e6edf3">acct &lt;NUM&gt;</tspan>
+  </text>
+  <rect x="20" y="262" width="760" height="106" rx="8" fill="#11161f"/>
+  <text font-size="12" xml:space="preserve">
+    <tspan x="36" y="288" fill="#7d8590"># masks IPs, UUIDs, timestamps, paths, hex, numbers, emails first</tspan>
+    <tspan x="36" y="310" fill="#c9d1d9">miner = TemplateMiner(similarity_threshold=0.5)</tspan>
+    <tspan x="36" y="330" fill="#c9d1d9">for c in miner.mine(lines): print(c.count, c.template_str())</tspan>
+    <tspan x="36" y="352" fill="#7d8590"># online clustering · length-bucketed · positions that vary → &lt;*&gt;</tspan>
+  </text>
+  <text x="24" y="396" font-size="12.5" fill="#3fb950" font-family="system-ui,sans-serif">✓ 6 tests · zero dependencies · feeds dashboards, alerting &amp; noise reduction</text>
+</svg>

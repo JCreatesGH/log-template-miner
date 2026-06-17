@@ -48,3 +48,13 @@ def test_examples_retained():
     c = miner.add_log("job 1 failed")
     miner.add_log("job 2 failed")
     assert len(c.examples) >= 1
+
+
+def test_match_is_read_only():
+    miner = TemplateMiner()
+    trained = miner.add_log("user alice logged in from 10.0.0.1")
+    before = trained.count
+    hit = miner.match("user bob logged in from 10.0.0.2")
+    assert hit is trained
+    assert trained.count == before          # match() must not mutate
+    assert miner.match("totally unrelated message with many other words here") is None

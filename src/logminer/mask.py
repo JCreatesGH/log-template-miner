@@ -11,6 +11,7 @@ _RULES = [
     (re.compile(r"\b\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?\b"), "<TS>"),
     (re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b"), "<EMAIL>"),
     (re.compile(r"/[\w./-]+"), "<PATH>"),
+    (re.compile(r"\b\d+\.\d+\b"), "<NUM>"),   # floats (e.g. 3.14 ms) before plain ints
     (re.compile(r"\b\d+\b"), "<NUM>"),
 ]
 

@@ -62,6 +62,20 @@ class TemplateMiner:
         bucket.append(cluster)
         return cluster
 
+    def match(self, line: str) -> Optional[Cluster]:
+        """Return the cluster `line` would join — without mutating any state.
+
+        Useful for classifying new lines against an already-trained miner.
+        """
+        tokens = self._tokens(line)
+        best: Optional[Cluster] = None
+        best_sim = 0.0
+        for c in self._by_len.get(len(tokens), []):
+            sim = _similarity(c.template, tokens)
+            if sim > best_sim:
+                best_sim, best = sim, c
+        return best if best is not None and best_sim >= self.threshold else None
+
     def mine(self, lines: List[str]) -> List[Cluster]:
         for line in lines:
             self.add_log(line)

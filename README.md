@@ -26,11 +26,26 @@ for c in miner.mine(open("app.log")):
 # 3   User <*> logged in from <IP>
 # 2   GET <PATH> <NUM> in <NUM>ms
 # 2   Disk usage at <NUM> percent
+
+# Classify a new line against a trained miner without changing it:
+miner.match("User dave logged in from 10.0.0.9")   # -> that cluster (or None)
 ```
+
+## CLI
+
+Installing the package adds a `logminer` command — point it at a file or pipe logs in:
+
+```bash
+$ logminer app.log               # templates, most frequent first
+$ tail -f app.log | logminer     # works on a stream
+$ logminer app.log --top 10 --json
+```
+
+Flags: `-t/--threshold`, `-n/--top`, `--no-mask`, `--json`.
 
 ## How it works
 
-1. **Mask** obvious variables first — IPs, UUIDs, MACs, timestamps, paths, hex, emails, and numbers become typed placeholders (`<IP>`, `<NUM>`, …).
+1. **Mask** obvious variables first — IPs, UUIDs, MACs, timestamps, paths, hex, emails, and numbers (ints *and* floats) become typed placeholders (`<IP>`, `<NUM>`, …).
 2. **Bucket** lines by token count.
 3. **Cluster online** — each line is matched against existing templates by positional similarity; on a match, positions that differ collapse to `<*>`, otherwise a new template is created.
 
@@ -39,7 +54,7 @@ It's streaming (`add_log` one line at a time) and ordered by frequency (`top()`)
 ## Development
 
 ```bash
-python -m pytest -q   # 6 tests
+pip install -e .[dev] && python -m pytest -q   # 11 tests
 ```
 
 ## License

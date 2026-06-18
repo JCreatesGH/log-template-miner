@@ -1,10 +1,24 @@
 """Token-based online log clustering (simplified Drain)."""
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from .mask import mask_variables
 
 WILDCARD = "<*>"
+
+
+def _is_placeholder(token: str) -> bool:
+    """A template slot that stands in for a variable: `<*>` or a mask like `<IP>`."""
+    return len(token) > 2 and token.startswith("<") and token.endswith(">")
+
+
+def extract_parameters(template: List[str], line: str) -> List[str]:
+    """The raw tokens of `line` that fall at the template's variable positions
+    (wildcards and mask placeholders). Empty if the lengths don't line up."""
+    raw = line.split()
+    if len(raw) != len(template):
+        return []
+    return [raw[i] for i, t in enumerate(template) if _is_placeholder(t)]
 
 
 @dataclass
@@ -75,6 +89,14 @@ class TemplateMiner:
             if sim > best_sim:
                 best_sim, best = sim, c
         return best if best is not None and best_sim >= self.threshold else None
+
+    def extract(self, line: str) -> Optional[Tuple[Cluster, List[str]]]:
+        """Match `line` to a trained cluster and pull out its parameter values.
+        Returns (cluster, params), or None if nothing matches. Read-only."""
+        cluster = self.match(line)
+        if cluster is None:
+            return None
+        return cluster, extract_parameters(cluster.template, line)
 
     def mine(self, lines: List[str]) -> List[Cluster]:
         for line in lines:

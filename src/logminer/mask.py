@@ -8,7 +8,11 @@ _RULES = [
     (re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?\b"), "<IP>"),
     (re.compile(r"\b[0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){5}\b"), "<MAC>"),
     (re.compile(r"\b0x[0-9a-fA-F]+\b"), "<HEX>"),
+    # hash/SHA-style ids: 7+ hex chars containing both a letter and a digit (so plain
+    # numbers stay <NUM> and english-ish hex words like "deadbeef" are left alone).
+    (re.compile(r"\b(?=[0-9a-fA-F]*[a-fA-F])(?=[0-9a-fA-F]*\d)[0-9a-fA-F]{7,}\b"), "<ID>"),
     (re.compile(r"\b\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?\b"), "<TS>"),
+    (re.compile(r"\bhttps?://[^\s]+"), "<URL>"),                 # whole URL before EMAIL/PATH
     (re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b"), "<EMAIL>"),
     (re.compile(r"/[\w./-]+"), "<PATH>"),
     (re.compile(r"\b\d+\.\d+\b"), "<NUM>"),   # floats (e.g. 3.14 ms) before plain ints

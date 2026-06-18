@@ -29,6 +29,11 @@ for c in miner.mine(open("app.log")):
 
 # Classify a new line against a trained miner without changing it:
 miner.match("User dave logged in from 10.0.0.9")   # -> that cluster (or None)
+
+# …or pull the *values* out of a matched line (template + the variable parts):
+cluster, params = miner.extract("User dave logged in from 10.0.0.9")
+# cluster.template_str() -> "User <*> logged in from <IP>"
+# params                 -> ["dave", "10.0.0.9"]
 ```
 
 ## CLI
@@ -45,16 +50,16 @@ Flags: `-t/--threshold`, `-n/--top`, `--no-mask`, `--json`.
 
 ## How it works
 
-1. **Mask** obvious variables first — IPs, UUIDs, MACs, timestamps, paths, hex, emails, and numbers (ints *and* floats) become typed placeholders (`<IP>`, `<NUM>`, …).
+1. **Mask** obvious variables first — IPs, UUIDs, MACs, timestamps, URLs, paths, hex, hash/SHA-style ids, emails, and numbers (ints *and* floats) become typed placeholders (`<IP>`, `<URL>`, `<ID>`, `<NUM>`, …).
 2. **Bucket** lines by token count.
 3. **Cluster online** — each line is matched against existing templates by positional similarity; on a match, positions that differ collapse to `<*>`, otherwise a new template is created.
 
-It's streaming (`add_log` one line at a time) and ordered by frequency (`top()`), so you immediately see which messages dominate your logs.
+It's streaming (`add_log` one line at a time) and ordered by frequency (`top()`), so you immediately see which messages dominate your logs. `extract()` then recovers the actual variable values behind any line — turning unstructured logs into `(template, params)` pairs you can index or alert on.
 
 ## Development
 
 ```bash
-pip install -e .[dev] && python -m pytest -q   # 11 tests
+pip install -e .[dev] && python -m pytest -q   # 15 tests
 ```
 
 ## License

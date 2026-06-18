@@ -1,4 +1,4 @@
-from logminer import TemplateMiner
+from logminer import TemplateMiner, extract_parameters
 
 
 def test_clusters_similar_lines():
@@ -58,3 +58,31 @@ def test_match_is_read_only():
     assert hit is trained
     assert trained.count == before          # match() must not mutate
     assert miner.match("totally unrelated message with many other words here") is None
+
+
+def test_extract_parameters_at_mask_positions():
+    template = ["user", "<NUM>", "from", "<IP>", "ok"]
+    assert extract_parameters(template, "user 4821 from 10.0.0.5 ok") == ["4821", "10.0.0.5"]
+    assert extract_parameters(template, "wrong length line") == []
+
+
+def test_miner_extract_returns_cluster_and_params():
+    miner = TemplateMiner()
+    miner.add_log("user 4821 from 10.0.0.5 ok")
+    miner.add_log("user 9999 from 10.0.0.9 ok")     # template: user <NUM> from <IP> ok
+    result = miner.extract("user 1234 from 10.0.0.1 ok")
+    assert result is not None
+    cluster, params = result
+    assert params == ["1234", "10.0.0.1"]
+    before = cluster.count
+    miner.extract("user 5 from 10.0.0.2 ok")        # extract() is read-only
+    assert cluster.count == before
+    assert miner.extract("nothing like the trained templates at all here") is None
+
+
+def test_extract_includes_wildcard_values():
+    miner = TemplateMiner(similarity_threshold=0.5)
+    miner.add_log("connection from alice closed")
+    miner.add_log("connection from bob closed")     # 'alice'/'bob' -> <*>
+    _, params = miner.extract("connection from carol closed")
+    assert params == ["carol"]

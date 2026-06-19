@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "logminer"
-version = "0.2.0"
-description = "Cluster raw log lines into templates and extract their parameters — a small, dependency-free Drain."
+version = "0.3.0"
+description = "Cluster raw log lines into templates, extract their parameters, and persist the model — a small, dependency-free Drain."
 readme = "README.md"
 authors = [{ name = "Joshua John", email = "josh202@gmail.com" }]
 requires-python = ">=3.8"

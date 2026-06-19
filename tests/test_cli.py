@@ -32,3 +32,14 @@ def test_cli_empty_input(tmp_path, capsys):
     f.write_text("")
     assert main([str(f)]) == 0
     assert "no log lines" in capsys.readouterr().out
+
+
+def test_cli_save_writes_reloadable_model(tmp_path, capsys):
+    from logminer import TemplateMiner
+    f = tmp_path / "app.log"
+    f.write_text(LOGS)
+    model = tmp_path / "model.json"
+    assert main([str(f), "--save", str(model)]) == 0
+    # the saved model reloads and classifies a fresh line
+    restored = TemplateMiner.from_json(model.read_text())
+    assert restored.match("User dave logged in from 10.0.0.9") is not None

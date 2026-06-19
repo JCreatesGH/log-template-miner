@@ -1,7 +1,8 @@
 """Token-based online log clustering (simplified Drain)."""
 from __future__ import annotations
+import json
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from .mask import mask_variables
 
 WILDCARD = "<*>"
@@ -105,3 +106,38 @@ class TemplateMiner:
 
     def top(self) -> List[Cluster]:
         return sorted(self.clusters, key=lambda c: -c.count)
+
+    # --- persistence: train once, serialize, reload to classify a stream ---------
+
+    def to_dict(self) -> Dict[str, Any]:
+        """A JSON-serializable snapshot of the trained miner."""
+        return {
+            "threshold": self.threshold,
+            "mask": self.mask,
+            "next_id": self._next_id,
+            "clusters": [
+                {"id": c.id, "template": c.template, "count": c.count, "examples": c.examples}
+                for c in self.clusters
+            ],
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "TemplateMiner":
+        """Rebuild a miner from `to_dict()` output — ready to `match`/`extract`/`add_log`."""
+        m = cls(similarity_threshold=data.get("threshold", 0.5), mask=data.get("mask", True))
+        for cd in data.get("clusters", []):
+            c = Cluster(id=cd["id"], template=list(cd["template"]),
+                        count=cd.get("count", 0), examples=list(cd.get("examples", [])))
+            m.clusters.append(c)
+            m._by_len.setdefault(len(c.template), []).append(c)
+        # keep new ids unique even if `next_id` was stale or absent
+        m._next_id = max(int(data.get("next_id", 0)),
+                         (max(c.id for c in m.clusters) + 1) if m.clusters else 0)
+        return m
+
+    def to_json(self, **kwargs: Any) -> str:
+        return json.dumps(self.to_dict(), **kwargs)
+
+    @classmethod
+    def from_json(cls, text: str) -> "TemplateMiner":
+        return cls.from_dict(json.loads(text))

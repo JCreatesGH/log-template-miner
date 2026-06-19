@@ -3,6 +3,15 @@
 All notable changes are documented here, following
 [Keep a Changelog](https://keepachangelog.com/) and [SemVer](https://semver.org/).
 
+## [0.3.0]
+
+### Added
+- **Model persistence** — `TemplateMiner.to_dict()` / `to_json()` snapshot a trained miner, and
+  `from_dict()` / `from_json()` rebuild it ready to `match`/`extract`/`add_log`. Train offline,
+  serialize, and reload to classify a live stream without retraining. Reload preserves cluster
+  ids and bumps the id counter so further training never collides.
+- CLI `--save PATH` writes the trained miner as JSON.
+
 ## [0.2.0]
 
 ### Added

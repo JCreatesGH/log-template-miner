@@ -17,6 +17,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("-n", "--top", type=int, default=None, help="show only the top N templates")
     parser.add_argument("--no-mask", action="store_true", help="don't pre-mask variables")
     parser.add_argument("--json", action="store_true", help="emit JSON")
+    parser.add_argument("--save", metavar="PATH",
+                        help="write the trained miner to PATH (reload with TemplateMiner.from_json)")
     args = parser.parse_args(argv)
 
     miner = TemplateMiner(similarity_threshold=args.threshold, mask=not args.no_mask)
@@ -29,6 +31,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     finally:
         if args.file:
             src.close()
+
+    if args.save:
+        with open(args.save, "w", encoding="utf-8") as fh:
+            fh.write(miner.to_json(indent=2))
 
     clusters = miner.top()
     if args.top is not None:

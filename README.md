@@ -34,6 +34,11 @@ miner.match("User dave logged in from 10.0.0.9")   # -> that cluster (or None)
 cluster, params = miner.extract("User dave logged in from 10.0.0.9")
 # cluster.template_str() -> "User <*> logged in from <IP>"
 # params                 -> ["dave", "10.0.0.9"]
+
+# Train once, save the model, reload it later to classify a live stream:
+open("model.json", "w").write(miner.to_json(indent=2))
+reloaded = TemplateMiner.from_json(open("model.json").read())
+reloaded.match("User erin logged in from 10.0.0.7")   # classify without retraining
 ```
 
 ## CLI
@@ -44,9 +49,10 @@ Installing the package adds a `logminer` command — point it at a file or pipe 
 $ logminer app.log               # templates, most frequent first
 $ tail -f app.log | logminer     # works on a stream
 $ logminer app.log --top 10 --json
+$ logminer train.log --save model.json   # train + persist; reload with TemplateMiner.from_json
 ```
 
-Flags: `-t/--threshold`, `-n/--top`, `--no-mask`, `--json`.
+Flags: `-t/--threshold`, `-n/--top`, `--no-mask`, `--json`, `--save PATH`.
 
 ## How it works
 
@@ -54,12 +60,12 @@ Flags: `-t/--threshold`, `-n/--top`, `--no-mask`, `--json`.
 2. **Bucket** lines by token count.
 3. **Cluster online** — each line is matched against existing templates by positional similarity; on a match, positions that differ collapse to `<*>`, otherwise a new template is created.
 
-It's streaming (`add_log` one line at a time) and ordered by frequency (`top()`), so you immediately see which messages dominate your logs. `extract()` then recovers the actual variable values behind any line — turning unstructured logs into `(template, params)` pairs you can index or alert on.
+It's streaming (`add_log` one line at a time) and ordered by frequency (`top()`), so you immediately see which messages dominate your logs. `extract()` then recovers the actual variable values behind any line — turning unstructured logs into `(template, params)` pairs you can index or alert on. And because the whole model serializes (`to_json` / `from_json`), you can **train it offline and reload it** to classify a live stream without retraining.
 
 ## Development
 
 ```bash
-pip install -e .[dev] && python -m pytest -q   # 15 tests
+pip install -e .[dev] && python -m pytest -q   # 18 tests
 ```
 
 ## License
